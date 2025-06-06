@@ -15,6 +15,7 @@ const CompanyOverview = () => {
   const [infoSections, setInfoSections] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
 
+
   const handleGenerate = async () => {
     setError('');
     setInfoSections([]);

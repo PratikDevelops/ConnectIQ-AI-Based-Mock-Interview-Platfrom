@@ -1,16 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { FaBars, FaTimes, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-
+import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false); // Simulated auth state
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const navigate = useNavigate("")
+
+  const { loggedIn, handleLogout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleUserMenu = () => setUserMenuOpen(!userMenuOpen);
+
+  const onLogout = () => {
+    handleLogout();
+    setUserMenuOpen(false);
+    navigate('/signup'); // or "/login" if you have a login route
+  };
+
+  const onLoginClick = () => {
+    navigate('/signup'); // or your login/signup route
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -27,8 +38,11 @@ const Navbar = () => {
           <a href="#" className="hover:text-[#7366ff] text-gray-800 font-medium">Contact</a>
 
           {!loggedIn ? (
-            <button onClick={()=>navigate("/dashboard")} className="bg-[#7366ff] text-white px-5 py-2 rounded-lg hover:bg-[#5a52d4] transition">
-              Login
+            <button
+              onClick={onLoginClick}
+              className="bg-[#7366ff] text-white px-5 py-2 rounded-lg hover:bg-[#5a52d4] transition"
+            >
+              Login / Signup
             </button>
           ) : (
             <div className="relative">
@@ -36,11 +50,11 @@ const Navbar = () => {
                 <FaUserCircle />
               </button>
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border shadow-lg rounded-lg">
+                <div className="absolute right-0 mt-2 w-40 bg-white border shadow-lg rounded-lg z-50">
                   <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Profile</a>
                   <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Settings</a>
                   <button
-                    onClick={() => setLoggedIn(false)}
+                    onClick={onLogout}
                     className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
                   >
                     Logout
@@ -66,13 +80,16 @@ const Navbar = () => {
           <a href="#" className="block text-gray-700 hover:text-[#7366ff]">Contact</a>
 
           {!loggedIn ? (
-            <button onClick={()=>navigate("/dashboard")} className="w-full bg-[#7366ff] text-white px-4 py-2 rounded-lg hover:bg-[#5a52d4]">
-              Login
+            <button
+              onClick={onLoginClick}
+              className="w-full bg-[#7366ff] text-white px-4 py-2 rounded-lg hover:bg-[#5a52d4]"
+            >
+              Login / Signup
             </button>
           ) : (
             <div>
               <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                onClick={toggleUserMenu}
                 className="flex items-center space-x-2 text-[#7366ff]"
               >
                 <FaUserCircle className="text-2xl" />
@@ -83,7 +100,7 @@ const Navbar = () => {
                   <a href="#" className="block text-gray-700 hover:text-[#7366ff]">Profile</a>
                   <a href="#" className="block text-gray-700 hover:text-[#7366ff]">Settings</a>
                   <button
-                    onClick={() => setLoggedIn(false)}
+                    onClick={onLogout}
                     className="text-red-600 hover:text-red-800"
                   >
                     Logout

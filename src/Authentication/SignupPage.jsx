@@ -7,22 +7,17 @@ import SignupIllustration from "./SignupIllustration";
 const SignupPage = () => {
   const navigate = useNavigate();
   const [isSignup, setIsSignup] = useState(true);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
   const validate = () => {
     const newErrors = {};
-    const { name, email, password, confirmPassword } = formData;
 
     if (isSignup && !name.trim()) newErrors.name = "Name is required";
     if (!email.trim()) newErrors.email = "Email is required";
@@ -37,14 +32,40 @@ const SignupPage = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      setSubmitted(true);
-      setTimeout(() => navigate("/"), 1500);
+      const payload = isSignup
+        ? { name, email, password }
+        : { email, password };
+
+      const endpoint = isSignup
+        ? "http://localhost:4000/api/auth/register"
+        : "http://localhost:4000/api/auth/login";
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          setSubmitted(true);
+          setTimeout(() => navigate("/dashboard"), 1500);
+        } else {
+          setErrors({ form: data.message });
+        }
+      } catch (error) {
+        setErrors({ form: "Something went wrong. Please try again." });
+      }
     }
   };
 
@@ -53,17 +74,15 @@ const SignupPage = () => {
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-br from-indigo-100 to-white flex items-center justify-center px-4"
+      className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-indigo-50 flex items-center justify-center px-4"
     >
       <div className="bg-white shadow-2xl rounded-xl max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
-        {/* Illustration */}
         <div className="bg-indigo-100 p-6 flex items-center justify-center">
           <div className="w-full h-72 md:h-auto">
             <SignupIllustration />
           </div>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-8 space-y-5">
           <h2 className="text-3xl font-bold text-indigo-700 text-center mb-2">
             {isSignup ? "Create Account" : "Welcome Back"}
@@ -76,6 +95,12 @@ const SignupPage = () => {
             </div>
           )}
 
+          {errors.form && (
+            <p className="text-red-600 text-center font-medium">
+              {errors.form}
+            </p>
+          )}
+
           {isSignup && (
             <div>
               <label className="block font-medium mb-1">Name</label>
@@ -84,8 +109,8 @@ const SignupPage = () => {
                 <input
                   type="text"
                   name="name"
-                  value={formData.name}
-                  onChange={handleChange}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className={`pl-10 w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 ${
                     errors.name
                       ? "border-red-500 focus:ring-red-400"
@@ -93,7 +118,9 @@ const SignupPage = () => {
                   }`}
                 />
               </div>
-              {errors.name && <p className="text-red-600 text-sm">{errors.name}</p>}
+              {errors.name && (
+                <p className="text-red-600 text-sm">{errors.name}</p>
+              )}
             </div>
           )}
 
@@ -104,8 +131,8 @@ const SignupPage = () => {
               <input
                 type="email"
                 name="email"
-                value={formData.email}
-                onChange={handleChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className={`pl-10 w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 ${
                   errors.email
                     ? "border-red-500 focus:ring-red-400"
@@ -113,7 +140,9 @@ const SignupPage = () => {
                 }`}
               />
             </div>
-            {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-600 text-sm">{errors.email}</p>
+            )}
           </div>
 
           <div>
@@ -123,8 +152,8 @@ const SignupPage = () => {
               <input
                 type="password"
                 name="password"
-                value={formData.password}
-                onChange={handleChange}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className={`pl-10 w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 ${
                   errors.password
                     ? "border-red-500 focus:ring-red-400"
@@ -132,7 +161,9 @@ const SignupPage = () => {
                 }`}
               />
             </div>
-            {errors.password && <p className="text-red-600 text-sm">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-600 text-sm">{errors.password}</p>
+            )}
           </div>
 
           {isSignup && (
@@ -143,8 +174,8 @@ const SignupPage = () => {
                 <input
                   type="password"
                   name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className={`pl-10 w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 ${
                     errors.confirmPassword
                       ? "border-red-500 focus:ring-red-400"

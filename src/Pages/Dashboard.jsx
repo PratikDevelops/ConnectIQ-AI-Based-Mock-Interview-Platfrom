@@ -11,14 +11,19 @@ import {
   FaLightbulb,
   FaComments,
   FaPaperPlane,
+  FaUserCircle,
 } from "react-icons/fa";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import ChatBot from "../Components/Chatbot";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
-  const navigate = useNavigate("")
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const menuItems = [
     {
@@ -63,15 +68,29 @@ const Dashboard = () => {
     },
   ];
 
+  const handleLogout = () => {
+    toast.success("Logged out successfully!");
+    setUserMenuOpen(false);
+    setTimeout(() => {
+      navigate("/signup");
+    }, 1500);
+  };
+
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
+    <div className="flex h-screen  shadow">
       <aside
         className={`fixed z-30 inset-y-0 left-0 w-72 bg-white shadow-lg overflow-y-auto transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:static md:inset-auto`}
+        ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 md:static md:inset-auto`}
       >
         <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200">
-          <h1 onClick={()=>navigate("/")} className="text-2xl cursor-pointer w-full font-bold text-indigo-700 tracking-wide">ConnectIQ</h1>
+          <h1
+            onClick={() => navigate("/")}
+            className="text-2xl cursor-pointer w-full font-bold text-indigo-700 tracking-wide"
+          >
+            ConnectIQ
+          </h1>
           <button
             className="md:hidden text-gray-600 hover:text-indigo-600 transition"
             onClick={() => setSidebarOpen(false)}
@@ -111,7 +130,7 @@ const Dashboard = () => {
       )}
 
       <div className="flex-1 flex flex-col">
-        <header className="flex items-center justify-between bg-white shadow px-6 py-4 md:hidden">
+        <header className="flex items-center justify-between bg-white shadow px-6 py-4 md:hidden relative">
           <button
             onClick={() => setSidebarOpen(true)}
             className="text-gray-700 focus:outline-none"
@@ -120,7 +139,54 @@ const Dashboard = () => {
             <FaBars className="w-6 h-6" />
           </button>
           <h1 className="text-xl font-bold text-indigo-700">Dashboard</h1>
-          <div />
+
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="text-indigo-700 text-2xl focus:outline-none"
+              aria-label="User menu"
+            >
+              <FaUserCircle />
+            </button>
+
+            {userMenuOpen && (
+              <div className="absolute right-0 mt-2 w-36 bg-white border rounded shadow-lg z-50">
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        <header className="hidden md:flex items-center  justify-end  px-6 py-6 relative">
+          <div className="relative flex items-center space-x-2">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="text-indigo-700 text-3xl focus:outline-none"
+              aria-label="User menu"
+            >
+              <FaUserCircle />
+            </button>
+
+            <span className="hidden md:inline text-indigo-700 font-semibold select-none">
+              Welcome, User
+            </span>
+          </div>
+
+          {userMenuOpen && (
+            <div className="absolute right-4 mt-25 w-40 bg-white border rounded  z-50">
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </header>
 
         <main className="flex-1 overflow-auto p-8 bg-gradient-to-br from-indigo-50 via-purple-50 to-indigo-50">
@@ -128,7 +194,6 @@ const Dashboard = () => {
         </main>
       </div>
 
-      {/* ChatBot Button */}
       <button
         onClick={() => setChatOpen(!chatOpen)}
         className="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg z-50"
@@ -138,6 +203,18 @@ const Dashboard = () => {
       </button>
 
       {chatOpen && <ChatBot onClose={() => setChatOpen(false)} />}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 };

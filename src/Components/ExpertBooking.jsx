@@ -1,7 +1,14 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaUserTie, FaWhatsapp, FaSearch, FaTimes } from 'react-icons/fa';
+import {
+  FaUserTie,
+  FaWhatsapp,
+  FaSearch,
+  FaTimes,
+  FaFilter,
+  FaChevronDown,
+} from 'react-icons/fa';
 
 const experts = [
   {
@@ -183,6 +190,7 @@ const roles = [
 const ExpertBooking = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   const openWhatsApp = (number, message) => {
     const encodedMsg = encodeURIComponent(message);
@@ -190,12 +198,8 @@ const ExpertBooking = () => {
   };
 
   const handleRoleFilter = (role) => {
-    if (selectedRole === role) {
-      setSelectedRole('');
-    } else {
-      setSelectedRole(role);
-      setSearchTerm(''); // Clear search when role selected
-    }
+    setSelectedRole(selectedRole === role ? '' : role);
+    setSearchTerm('');
   };
 
   const clearFilters = () => {
@@ -211,38 +215,58 @@ const ExpertBooking = () => {
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 mt-20">
+    <motion.div
+      className="max-w-6xl mx-auto px-6 py-6"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <h2 className="text-3xl font-bold text-blue-600 text-center mb-10 flex justify-center items-center gap-2">
         <FaUserTie /> Book a Session with Experts
       </h2>
 
-      {/* Role Filter Buttons */}
-      <div className="mb-6 flex flex-wrap justify-center gap-3">
-        {roles.map((role) => (
-          <button
-            key={role}
-            onClick={() => handleRoleFilter(role)}
-            className={`px-4 py-2 rounded-full border transition font-semibold ${
-              selectedRole === role
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-blue-600 border-blue-600 hover:bg-blue-100'
+      <div className="md:hidden mb-6 flex justify-center">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full shadow hover:bg-blue-700 transition"
+        >
+          <FaFilter />
+          {showFilters ? 'Hide Filters' : 'Show Filters'}
+          <FaChevronDown
+            className={`transform transition-transform ${
+              showFilters ? 'rotate-180' : 'rotate-0'
             }`}
-          >
-            {role}
-          </button>
-        ))}
-
-        {(searchTerm || selectedRole) && (
-          <button
-            onClick={clearFilters}
-            className="ml-4 px-4 py-2 rounded-full border border-red-500 text-red-500 hover:bg-red-100 flex items-center gap-1 font-semibold"
-          >
-            <FaTimes /> Clear Filters
-          </button>
-        )}
+          />
+        </button>
       </div>
 
-      {/* Search Input */}
+      {(showFilters || window.innerWidth >= 768) && (
+        <div className="mb-6 flex flex-wrap justify-center gap-3 transition-all duration-300 ease-in-out">
+          {roles.map((role) => (
+            <button
+              key={role}
+              onClick={() => handleRoleFilter(role)}
+              className={`px-4 py-2 rounded-full border transition font-semibold ${
+                selectedRole === role
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-white text-blue-600 border-blue-600 hover:bg-blue-100'
+              }`}
+            >
+              {role}
+            </button>
+          ))}
+
+          {(searchTerm || selectedRole) && (
+            <button
+              onClick={clearFilters}
+              className="ml-2 px-4 py-2 rounded-full border border-red-500 text-red-500 hover:bg-red-100 flex items-center gap-1 font-semibold"
+            >
+              <FaTimes /> Clear Filters
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="mb-10 flex justify-center">
         <div className="relative w-full md:w-1/2">
           <input
@@ -256,7 +280,6 @@ const ExpertBooking = () => {
         </div>
       </div>
 
-      {/* Experts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {filteredExperts.length > 0 ? (
           filteredExperts.map((expert, index) => (
@@ -277,7 +300,6 @@ const ExpertBooking = () => {
               </h3>
               <p className="text-blue-600 text-center font-medium">{expert.role}</p>
               <p className="text-gray-600 mt-3 text-center text-sm">{expert.bio}</p>
-
               <button
                 onClick={() => openWhatsApp(expert.whatsapp, expert.message)}
                 className="mt-6 w-full flex justify-center items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition"
@@ -292,9 +314,10 @@ const ExpertBooking = () => {
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 export default ExpertBooking;
+
 

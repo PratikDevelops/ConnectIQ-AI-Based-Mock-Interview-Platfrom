@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom"; // 👈 Import useNavigate
+import { useNavigate } from "react-router-dom";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { FaBriefcase } from "react-icons/fa";
+
+const MODEL_NAME = "gemini-2.5-flash-preview-04-17";
+const API_KEY = "AIzaSyCoYNO_88mK05IWYVFbkeK69sFpDXmK6fc";
+
+const commonSkills = ["React", "Node.js", "MongoDB", "SQL", "CSS", "JavaScript", "Python"];
 
 const InterviewPage = () => {
   const [name, setName] = useState("");
@@ -9,179 +16,174 @@ const InterviewPage = () => {
   const [experience, setExperience] = useState("");
   const [portfolio, setPortfolio] = useState("");
   const [errors, setErrors] = useState({});
-  const [submitStatus, setSubmitStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate(); // 👈 Initialize navigate
+  const navigate = useNavigate();
 
   const validate = () => {
     const newErrors = {};
     if (!name.trim()) newErrors.name = "Name is required";
     if (!position.trim()) newErrors.position = "Position is required";
     if (!skills.trim()) newErrors.skills = "Please enter skills";
-    if (!experience.trim()) newErrors.experience = "Please enter years of experience";
+    if (!experience.trim()) newErrors.experience = "Enter years of experience";
     return newErrors;
-  };
-
-  const handleReset = () => {
-    setName("");
-    setPosition("");
-    setSkills("");
-    setExperience("");
-    setPortfolio("");
-    setErrors({});
-    setSubmitStatus(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitStatus(null);
     const validationErrors = validate();
+    setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+      const firstErrorField = Object.keys(validationErrors)[0];
+      document.querySelector(`[name="${firstErrorField}"]`)?.focus();
       return;
     }
 
-    setErrors({});
     setLoading(true);
 
     try {
-      await new Promise((res) => setTimeout(res, 1500));
-      setSubmitStatus("success");
+      const genAI = new GoogleGenerativeAI(API_KEY);
+      const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
-      // Redirect after short delay to show success message
-      setTimeout(() => {
-        navigate("/interview-questions", {
-          state: { name, position, skills, experience, portfolio },
-        });
-      }, 1000);
+      const prompt = `
+My name is ${name}. I want to prepare for a ${position} interview.
+My skills are: ${skills}. I have ${experience} years of experience.
 
+Generate 5 interview questions and answers in JSON:
+[
+  {
+    "question": "Your question?",
+    "answer": "Your answer."
+  }
+]
+Only return valid JSON.
+      `;
+
+      const result = await model.generateContent(prompt);
+      const rawText = (await result.response.text()).trim();
+      const cleanJson = rawText.replace(/^```json|```$/g, "").trim();
+      const parsed = JSON.parse(cleanJson);
+
+      navigate("/interview-questions", {
+        state: { name, position, skills, experience, portfolio, Question: parsed },
+      });
     } catch (error) {
-      setSubmitStatus("error");
+      console.error("Gemini Error:", error);
+      alert("Failed to generate questions. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleReset = () => {
+    if (window.confirm("Are you sure you want to reset the form?")) {
+      setName("");
+      setPosition("");
+      setSkills("");
+      setExperience("");
+      setPortfolio("");
+      setErrors({});
+    }
+  };
+
+  const progress = [name, position, skills, experience].filter(Boolean).length / 4 * 100;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="max-w-xl mx-auto mt-16 p-8 rounded-lg shadow-md bg-white"
+      transition={{ duration: 0.4 }}
+      className="max-w-3xl mx-auto mt-16 p-8 rounded-lg shadow-md bg-white"
     >
-      <h1 className="text-3xl font-semibold mb-6 text-indigo-700 text-center">
-        Take Interview
+      <h1 className="text-3xl font-semibold mb-4 text-indigo-700 text-center flex items-center justify-center gap-2">
+        <FaBriefcase /> Prepare for Your Interview
       </h1>
 
-      {submitStatus === "success" && (
-        <div className="mb-4 p-4 text-green-800 bg-green-200 rounded">
-          Interview submitted successfully! Redirecting...
-        </div>
-      )}
-      {submitStatus === "error" && (
-        <div className="mb-4 p-4 text-red-800 bg-red-200 rounded">
-          There was an error submitting the interview. Please try again.
-        </div>
-      )}
+      <div className="h-2 w-full bg-gray-200 rounded-full mb-6">
+        <div
+          className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="mb-5">
-          <label htmlFor="name" className="block font-medium mb-1">
-            Candidate Name
-          </label>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Full Name</label>
           <input
-            type="text"
-            id="name"
             name="name"
+            type="text"
+            autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 ${
-              errors.name
-                ? "border-red-500 focus:ring-red-400"
-                : "border-gray-300 focus:ring-indigo-400"
-            }`}
+            className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="e.g. Pratik Kedar"
           />
-          {errors.name && <p className="text-red-600 mt-1">{errors.name}</p>}
+          {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
         </div>
 
-
-        <div className="mb-5">
-          <label htmlFor="position" className="block font-medium mb-1">
-            Position Applied For
-          </label>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Position</label>
           <input
-            type="text"
-            id="position"
             name="position"
-            placeholder="Enter position"
+            type="text"
             value={position}
             onChange={(e) => setPosition(e.target.value)}
-            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 ${
-              errors.position
-                ? "border-red-500 focus:ring-red-400"
-                : "border-gray-300 focus:ring-indigo-400"
-            }`}
+            className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="e.g. Frontend Developer"
           />
-          {errors.position && <p className="text-red-600 mt-1">{errors.position}</p>}
+          {errors.position && <p className="text-red-600 text-sm mt-1">{errors.position}</p>}
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="skills" className="block font-medium mb-1">
-            Skills
-          </label>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Skills</label>
           <input
-            type="text"
-            id="skills"
             name="skills"
-            placeholder="E.g. HTML, CSS, JavaScript"
+            type="text"
             value={skills}
             onChange={(e) => setSkills(e.target.value)}
-            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 ${
-              errors.skills
-                ? "border-red-500 focus:ring-red-400"
-                : "border-gray-300 focus:ring-indigo-400"
-            }`}
+            className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="e.g. React, Node.js, SQL"
           />
-          {errors.skills && <p className="text-red-600 mt-1">{errors.skills}</p>}
+          {errors.skills && <p className="text-red-600 text-sm mt-1">{errors.skills}</p>}
+          <div className="mt-2 flex flex-wrap gap-2">
+            {commonSkills.map((skill, idx) => (
+              <span
+                key={idx}
+                onClick={() => setSkills((prev) => prev ? `${prev}, ${skill}` : skill)}
+                className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm cursor-pointer hover:bg-indigo-200"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="experience" className="block font-medium mb-1">
-            Years of Experience
-          </label>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Experience (Years)</label>
           <input
-            type="number"
-            id="experience"
             name="experience"
-            min="0"
+            type="number"
             value={experience}
             onChange={(e) => setExperience(e.target.value)}
-            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 ${
-              errors.experience
-                ? "border-red-500 focus:ring-red-400"
-                : "border-gray-300 focus:ring-indigo-400"
-            }`}
+            className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="e.g. 2"
+            min="0"
           />
-          {errors.experience && <p className="text-red-600 mt-1">{errors.experience}</p>}
+          {errors.experience && <p className="text-red-600 text-sm mt-1">{errors.experience}</p>}
         </div>
 
-        <div className="mb-5">
-          <label htmlFor="portfolio" className="block font-medium mb-1">
-            Portfolio Link (optional)
-          </label>
+        <div className="mb-6">
+          <label className="block font-medium mb-1">Portfolio (Optional)</label>
           <input
             type="url"
-            id="portfolio"
-            name="portfolio"
-            placeholder="https://yourportfolio.com"
             value={portfolio}
             onChange={(e) => setPortfolio(e.target.value)}
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-indigo-400"
+            className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="https://yourportfolio.com"
           />
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between mt-6">
           <button
             type="button"
             onClick={handleReset}
@@ -195,7 +197,7 @@ const InterviewPage = () => {
             disabled={loading}
             className="px-6 py-3 rounded bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition disabled:opacity-60"
           >
-            {loading ? "Submitting..." : "Submit Interview"}
+            {loading ? "Generating..." : "Submit Interview"}
           </button>
         </div>
       </form>

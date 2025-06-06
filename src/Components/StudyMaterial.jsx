@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaBookOpen, FaDownload, FaSearch, FaTimes } from 'react-icons/fa';
+import { FaBookOpen, FaDownload, FaSearch, FaTimes,FaFilter,FaChevronDown } from 'react-icons/fa';
 
 const studyMaterials = [
   {
@@ -186,6 +186,8 @@ const categories = [
 const StudyMaterialDownload = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+
 
   const handleCategoryFilter = (cat) => {
     if (selectedCategory === cat) {
@@ -208,11 +210,35 @@ const StudyMaterialDownload = () => {
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 ">
-      <h2 className="text-3xl font-bold text-blue-600 text-center mb-10 flex justify-center items-center gap-2">
-        <FaBookOpen /> Download Study Materials
-      </h2>
+  <motion.div
+    className="max-w-6xl mx-auto px-6 py-6"
+    initial={{ opacity: 0, y: 40 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+  >
+    <h2 className="text-3xl font-bold text-blue-600 text-center mb-10 flex justify-center items-center gap-2">
+      <FaBookOpen /> Download Study Materials
+    </h2>
 
+    {/* Toggle Filters Button (only on small screens) */}
+    <div className="md:hidden mb-6 flex justify-center">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full shadow hover:bg-blue-700 transition"
+            >
+              <FaFilter />
+              {showFilters ? 'Hide Filters' : 'Show Filters'}
+              <FaChevronDown
+                className={`transform transition-transform ${
+                  showFilters ? 'rotate-180' : 'rotate-0'
+                }`}
+              />
+            </button>
+          </div>
+
+    {/* Filters + Search: show always on md+, toggle on sm */}
+    <div className={`md:block ${showFilters ? 'block' : 'hidden'}`}>
+      {/* Category Filters */}
       <div className="mb-6 flex flex-wrap justify-center gap-3">
         {categories.map((cat) => (
           <button
@@ -220,7 +246,7 @@ const StudyMaterialDownload = () => {
             onClick={() => handleCategoryFilter(cat)}
             className={`px-4 py-2 rounded-full border transition font-semibold ${
               selectedCategory === cat
-                 ? 'bg-blue-600 text-white border-blue-600'
+                ? 'bg-blue-600 text-white border-blue-600'
                 : 'bg-white text-blue-600 border-blue-600 hover:bg-blue-100'
             }`}
           >
@@ -237,7 +263,7 @@ const StudyMaterialDownload = () => {
         )}
       </div>
 
-
+      {/* Search Bar */}
       <div className="mb-10 flex justify-center">
         <div className="relative w-full md:w-1/2">
           <input
@@ -250,37 +276,40 @@ const StudyMaterialDownload = () => {
           <FaSearch className="absolute top-4 left-4 text-gray-400" />
         </div>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {filteredMaterials.length > 0 ? (
-          filteredMaterials.map((material, index) => (
-            <motion.div
-              key={index}
-              whileHover={{ scale: 1.05 }}
-              className="bg-white rounded-2xl p-6 shadow-lg border cursor-pointer hover:shadow-xl transition-shadow"
-            >
-              <h3 className="text-xl font-semibold text-gray-800 mb-2 text-center">{material.title}</h3>
-              <p className="text-blue-600 text-center font-medium">{material.category}</p>
-              <p className="text-gray-600 mt-3 text-center text-sm">{material.description}</p>
-
-              <a
-                href={material.fileUrl}
-                download
-                className="mt-6 block w-full text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
-              >
-                <FaDownload className="inline mr-2" />
-                Download PDF
-              </a>
-            </motion.div>
-          ))
-        ) : (
-          <p className="text-center text-gray-600 col-span-full">
-            No materials found for "{searchTerm || selectedCategory}"
-          </p>
-        )}
-      </div>
     </div>
-  );
+
+    {/* Material Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {filteredMaterials.length > 0 ? (
+        filteredMaterials.map((material, index) => (
+          <motion.div
+            key={index}
+            whileHover={{ scale: 1.05 }}
+            className="bg-white rounded-2xl p-6 shadow-lg border cursor-pointer hover:shadow-xl transition-shadow"
+          >
+            <h3 className="text-xl font-semibold text-gray-800 mb-2 text-center">{material.title}</h3>
+            <p className="text-blue-600 text-center font-medium">{material.category}</p>
+            <p className="text-gray-600 mt-3 text-center text-sm">{material.description}</p>
+
+            <a
+              href={material.fileUrl}
+              download
+              className="mt-6 block w-full text-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+            >
+              <FaDownload className="inline mr-2" />
+              Download PDF
+            </a>
+          </motion.div>
+        ))
+      ) : (
+        <p className="text-center text-gray-600 col-span-full">
+          No materials found for "{searchTerm || selectedCategory}"
+        </p>
+      )}
+    </div>
+  </motion.div>
+);
+
 };
 
 export default StudyMaterialDownload;

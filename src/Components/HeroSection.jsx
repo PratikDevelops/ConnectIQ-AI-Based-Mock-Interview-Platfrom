@@ -4,8 +4,10 @@ import Typewriter from 'typewriter-effect';
 import { Link } from 'react-scroll';
 import { FaChevronDown } from 'react-icons/fa';
 import InterviewIllustration from './InterviewIllustration';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate("")
   return (
     <section className=" py-20 px-6 md:px-12 lg:px-24 relative overflow-hidden">
       <div className="max-w-7xl mx-auto flex flex-col-reverse md:flex-row items-center justify-between gap-12">
@@ -37,12 +39,14 @@ const HeroSection = () => {
           <div className="flex justify-center md:justify-start gap-4">
             <motion.button
               whileHover={{ scale: 1.05 }}
+              onClick={()=>{navigate('/signup');}}
               className="bg-[#7366ff] text-white px-6 py-3 rounded-xl text-lg font-semibold shadow-md hover:bg-[#5e54d9] transition"
             >
               Get Started
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
+              onClick={()=>{navigate('/learn-more');}}
               className="border border-[#7366ff] text-[#7366ff] px-6 py-3 rounded-xl text-lg font-semibold hover:bg-[#f2f0ff] transition"
             >
               Learn More

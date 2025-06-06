@@ -1,8 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaUserTie } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const BookInterviewSection = () => {
+  const navigate = useNavigate("")
   return (
     <motion.section
       initial={{ opacity: 0, y: 40 }}
@@ -26,6 +28,7 @@ const BookInterviewSection = () => {
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
+        onClick={()=>{navigate('/dashboard/expert-booking');}}
         className="bg-indigo-700 hover:bg-indigo-800 text-white font-bold px-10 md:px-12 py-3 md:py-4 rounded-full text-lg md:text-xl shadow-lg transition w-full md:w-auto mt-8 md:mt-0"
       >
         Book Now

@@ -16,6 +16,9 @@ import SignupPage from './Authentication/SignupPage';
 import NotFoundPage from './Pages/NotFoundPage';
 import StudyMaterial from './Components/StudyMaterial';
 import StudyMaterialDownload from './Components/StudyMaterial';
+import FeedbackPage from './Pages/FeedbackPage';
+import LearnMorePage from './Pages/LearnMorePage';
+import InterviewChatbot from './Components/InterviewChatbot';
 
 
 const App = () => {
@@ -36,6 +39,8 @@ const App = () => {
         </Route>
         <Route path="/interview-questions" element={<InterviewQuestionsPage/>} />
         <Route path='/signup' element={<SignupPage/>}/>
+        <Route path='/learn-more' element={<LearnMorePage/>}/>
+        <Route path='/feedback' element={<FeedbackPage/>}/>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>

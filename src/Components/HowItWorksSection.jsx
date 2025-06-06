@@ -1,6 +1,7 @@
 import React from "react";
 import { FaPlayCircle, FaRobot, FaCheckCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const steps = [
   {
@@ -37,6 +38,7 @@ const containerVariants = {
 };
 
 const HowItWorksSection = () => {
+  const navigate = useNavigate("")
   return (
     <section className=" py-24 px-6 md:px-12 lg:px-20 overflow-hidden">
       <div className="absolute top-[-60px] left-[-80px] w-72 h-72 bg-[#7366ff] opacity-10 rounded-full blur-3xl pointer-events-none"></div>
@@ -92,6 +94,7 @@ const HowItWorksSection = () => {
       <div className="mt-16 text-center relative z-10">
         <button
           type="button"
+          onClick={()=>{navigate("/dashboard")}}
           className="bg-[#7366ff] hover:bg-[#5e54d9] text-white font-semibold px-8 py-3 rounded-full shadow-lg text-lg transition"
         >
           Start Your Mock Interview
