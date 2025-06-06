@@ -18,7 +18,7 @@ import StudyMaterial from './Components/StudyMaterial';
 import StudyMaterialDownload from './Components/StudyMaterial';
 import FeedbackPage from './Pages/FeedbackPage';
 import LearnMorePage from './Pages/LearnMorePage';
-import InterviewChatbot from './Components/InterviewChatbot';
+
 
 
 const App = () => {
